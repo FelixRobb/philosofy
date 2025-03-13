@@ -19,7 +19,6 @@ import {
   Play,
   Info,
   BarChart3,
-  Sparkles,
   Hourglass,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -770,45 +769,54 @@ export function DeterminismGame() {
 
   // Set up timer for time-limited dilemmas
   useEffect(() => {
-    let timer: NodeJS.Timeout | undefined
-
-    if (gameState !== "playing" || !currentDilemma || showReflection) {
+    // Early return if conditions aren't met
+    if (!currentDilemma?.timeLimit || gameState !== "playing" || showReflection) {
+      setTimeRemaining(null)
       return
     }
 
-    const setupTimer = () => {
-      if (currentDilemma.timeLimit) {
-        setTimeRemaining(currentDilemma.timeLimit)
-        setStartTime(Date.now())
+    // Only initialize the timer if timeRemaining isn't already set
+    if (timeRemaining === null) {
+      // Record the start time for analytics purposes
+      setStartTime(Date.now())
+      setTimeRemaining(currentDilemma.timeLimit)
+    }
 
-        timer = setInterval(() => {
-          setTimeRemaining((prev) => {
-            if (prev === null || prev <= 1) {
-              if (timer) clearInterval(timer)
-              // Auto-select first available choice if time runs out
-              const availableChoices = currentDilemma.choices.filter(
-                (choice) => !choice.requiresTrait || traits[choice.requiresTrait.trait] >= choice.requiresTrait.min,
-              )
-              if (availableChoices.length > 0) {
-                handleChoice(availableChoices[0])
-              }
-              return null
+    // Create a countdown timer that ticks every second
+    const timer = setInterval(() => {
+      setTimeRemaining(prevTime => {
+        // Don't update if timer is already at 0 or null
+        if (prevTime === 0 || prevTime === null) {
+          return prevTime
+        }
+
+        const newTime = prevTime - 1
+
+        // Handle timer expiration
+        if (newTime <= 0) {
+          clearInterval(timer)
+
+          // Find available choices and auto-select the first one
+          if (currentDilemma?.choices) {
+            const availableChoices = currentDilemma.choices.filter(
+              choice => !choice.requiresTrait || traits[choice.requiresTrait.trait] >= choice.requiresTrait.min
+            )
+
+            if (availableChoices.length > 0) {
+              handleChoice(availableChoices[0])
             }
-            return prev - 1
-          })
-        }, 1000)
-      } else {
-        setTimeRemaining(null)
-        setStartTime(Date.now())
-      }
-    }
+          }
 
-    setupTimer()
+          return 0
+        }
 
-    return () => {
-      if (timer) clearInterval(timer)
-    }
-  }, [currentDilemma, showReflection, gameState, handleChoice, traits])
+        return newTime
+      })
+    }, 1000)
+
+    // Cleanup function to clear the interval
+    return () => clearInterval(timer)
+  }, [currentDilemma?.id, currentDilemma?.timeLimit, gameState, showReflection, traits, handleChoice, timeRemaining, currentDilemma?.choices])
 
   // Filter choices based on user traits and priming
   const availableChoices = currentDilemma
@@ -826,8 +834,6 @@ export function DeterminismGame() {
       return true
     })
     : []
-
-
 
   const handleNext = () => {
     if (!currentDilemma) return
@@ -1124,13 +1130,8 @@ export function DeterminismGame() {
           </div>
 
           <div className="mt-6 p-4 bg-purple-900/30 rounded-lg border border-purple-500/20">
-            <div className="flex items-center mb-2">
-              <Sparkles className="h-5 w-5 mr-2 text-purple-400" />
-              <h3 className="font-semibold text-purple-300">The Experiment</h3>
-            </div>
-            <p className="text-white/80">
-              In this experience, you&apos;ll navigate through 8 scenarios, making choices that feel free. At the end, we&apos;ll
-              reveal the hidden influences that actually determined your decisions.
+            <p className="text-indigo-200 italic text-center">
+              &quot;{deterministicQuotes[Math.floor(Math.random() * deterministicQuotes.length)]}&quot;
             </p>
           </div>
         </div>
@@ -1645,4 +1646,3 @@ export function DeterminismGame() {
     return renderAnalysisScreen()
   }
 }
-

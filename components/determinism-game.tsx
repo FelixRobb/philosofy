@@ -796,14 +796,15 @@ export function DeterminismGame() {
         if (newTime <= 0) {
           clearInterval(timer)
 
-          // Find available choices and auto-select the first one
+          // Find available choices and auto-select one at random
           if (currentDilemma?.choices) {
             const availableChoices = currentDilemma.choices.filter(
               choice => !choice.requiresTrait || traits[choice.requiresTrait.trait] >= choice.requiresTrait.min
             )
 
             if (availableChoices.length > 0) {
-              handleChoice(availableChoices[0])
+              const randomIndex = Math.floor(Math.random() * availableChoices.length)
+              handleChoice(availableChoices[randomIndex])
             }
           }
 

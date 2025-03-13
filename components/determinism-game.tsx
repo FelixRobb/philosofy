@@ -770,35 +770,45 @@ export function DeterminismGame() {
 
   // Set up timer for time-limited dilemmas
   useEffect(() => {
-    if (gameState !== "playing" || !currentDilemma || showReflection) return
+    let timer: NodeJS.Timeout | undefined
 
-    if (currentDilemma.timeLimit) {
-      setTimeRemaining(currentDilemma.timeLimit)
-      setStartTime(Date.now())
-
-      const timer = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev === null || prev <= 1) {
-            clearInterval(timer)
-            // Auto-select first available choice if time runs out
-            const availableChoices = currentDilemma.choices.filter(
-              (choice) => !choice.requiresTrait || traits[choice.requiresTrait.trait] >= choice.requiresTrait.min,
-            )
-            if (availableChoices.length > 0) {
-              handleChoice(availableChoices[0])
-            }
-            return null
-          }
-          return prev - 1
-        })
-      }, 1000)
-
-      return () => clearInterval(timer)
-    } else {
-      setTimeRemaining(null)
-      setStartTime(Date.now())
+    if (gameState !== "playing" || !currentDilemma || showReflection) {
+      return
     }
-  }, [currentDilemmaId, showReflection, gameState, currentDilemma, traits, handleChoice])
+
+    const setupTimer = () => {
+      if (currentDilemma.timeLimit) {
+        setTimeRemaining(currentDilemma.timeLimit)
+        setStartTime(Date.now())
+
+        timer = setInterval(() => {
+          setTimeRemaining((prev) => {
+            if (prev === null || prev <= 1) {
+              if (timer) clearInterval(timer)
+              // Auto-select first available choice if time runs out
+              const availableChoices = currentDilemma.choices.filter(
+                (choice) => !choice.requiresTrait || traits[choice.requiresTrait.trait] >= choice.requiresTrait.min,
+              )
+              if (availableChoices.length > 0) {
+                handleChoice(availableChoices[0])
+              }
+              return null
+            }
+            return prev - 1
+          })
+        }, 1000)
+      } else {
+        setTimeRemaining(null)
+        setStartTime(Date.now())
+      }
+    }
+
+    setupTimer()
+
+    return () => {
+      if (timer) clearInterval(timer)
+    }
+  }, [currentDilemma, showReflection, gameState, handleChoice, traits])
 
   // Filter choices based on user traits and priming
   const availableChoices = currentDilemma
@@ -1127,6 +1137,7 @@ export function DeterminismGame() {
 
         <div className="flex justify-center space-x-4 mt-6">
           <Button
+            size="lg"
             variant="outline"
             onClick={() => setWelcomeStep(0)}
             className="border-indigo-500/50 text-indigo-300 hover:bg-indigo-900/50"
@@ -1188,9 +1199,10 @@ export function DeterminismGame() {
 
         <div className="flex justify-center space-x-4 mt-6">
           <Button
+            size="lg"
             variant="outline"
             onClick={() => setWelcomeStep(1)}
-            className="border-indigo-500/50 text-indigo-300 hover:bg-indigo-900/50"
+            className="border-indigo-500/50 text-indigo-300 hover:bg-indigo-900/50 px-8 py-6 text-lg"
           >
             Back
           </Button>

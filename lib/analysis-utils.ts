@@ -9,7 +9,7 @@ export function findDecisionPatterns(
   const patterns = []
 
   // Check for fast decisions
-  const fastDecisions = Object.entries(decisionTimes).filter(([_, time]) => time < 5).length
+  const fastDecisions = Object.entries(decisionTimes).filter(([, time]) => time < 5).length
   if (fastDecisions > completedDilemmas.length / 2) {
     patterns.push(
       "You consistently made quick decisions, revealing a predetermined tendency to trust your initial impulses—a trait shaped by your neurological reward system and past experiences where quick thinking was beneficial.",
@@ -17,7 +17,7 @@ export function findDecisionPatterns(
   }
 
   // Check for slow, deliberate decisions
-  const slowDecisions = Object.entries(decisionTimes).filter(([_, time]) => time > 10).length
+  const slowDecisions = Object.entries(decisionTimes).filter(([, time]) => time > 10).length
   if (slowDecisions > completedDilemmas.length / 2) {
     patterns.push(
       "Your tendency to carefully deliberate before deciding reveals neural pathways shaped by past experiences where careful consideration was rewarded and impulsivity led to negative outcomes.",

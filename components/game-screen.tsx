@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -52,38 +52,22 @@ export function GameScreen({
   // Calculate progress
   const progress = Math.min((completedDilemmas.length / 8) * 100, 100)
 
-  // Track mouse movements
-  useEffect(() => {
-    if (!containerRef.current) return
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (containerRef.current) {
-        // Mouse movement tracking is now handled in the useGameState hook
-      }
-    }
-
-    containerRef.current.addEventListener("mousemove", handleMouseMove)
-
-    return () => {
-      containerRef.current?.removeEventListener("mousemove", handleMouseMove)
-    }
-  }, [currentDilemmaId])
 
   // Filter choices based on user traits and priming
   const availableChoices = currentDilemma
     ? currentDilemma.choices.filter((choice) => {
-        // Check if this choice requires a certain trait level
-        if (choice.requiresTrait && traits[choice.requiresTrait.trait] < choice.requiresTrait.min) {
-          return false
-        }
+      // Check if this choice requires a certain trait level
+      if (choice.requiresTrait && traits[choice.requiresTrait.trait] < choice.requiresTrait.min) {
+        return false
+      }
 
-        // Check if this choice requires certain priming
-        if (choice.requiresPriming && mindState.primed !== choice.requiresPriming) {
-          return false
-        }
+      // Check if this choice requires certain priming
+      if (choice.requiresPriming && mindState.primed !== choice.requiresPriming) {
+        return false
+      }
 
-        return true
-      })
+      return true
+    })
     : []
 
   // Handle next button with completion check

@@ -49,7 +49,7 @@ export function TraitsAnalysis({ traits }: TraitsAnalysisProps) {
         </h4>
         <p className="text-white/80">
           The changes in your traits throughout this experience were not random. Each trait shift was the inevitable
-          result of how your existing traits interacted with the scenarios presented. Your brain's neuroplasticity—its
+          result of how your existing traits interacted with the scenarios presented. Your brain&apos;s neuroplasticity—its
           ability to change—follows deterministic laws of cause and effect.
         </p>
       </div>

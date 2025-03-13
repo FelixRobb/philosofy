@@ -83,7 +83,7 @@ export function AnalysisScreen({
               <TabsContent value="analysis" className="mt-6 space-y-6">
                 <div className="space-y-6">
                   <p className="text-lg text-white/90 leading-relaxed">
-                    You've navigated through a series of interconnected scenarios, making what felt like free choices
+                    You&lsquo;ve navigated through a series of interconnected scenarios, making what felt like free choices
                     along the way. This experience was designed to illustrate a profound philosophical concept: the
                     illusion of free will.
                   </p>
@@ -115,11 +115,11 @@ export function AnalysisScreen({
                   <p className="font-semibold text-indigo-200 leading-relaxed">
                     The feeling of choice is powerful—you deliberated, weighed options, and selected what seemed best.
                     Yet each neural pathway that led to your decisions was shaped by prior causes stretching back before
-                    your birth, creating what philosophers call "causal necessity."
+                    your birth, creating what philosophers call &quot;causal necessity.&quot;
                   </p>
 
                   <p className="text-white/90 leading-relaxed">
-                    As Schopenhauer put it: "Man can do what he wills, but he cannot will what he wills." Your desires,
+                    As Schopenhauer put it: &quot;Man can do what he wills, but he cannot will what he wills.&quot; Your desires,
                     preferences, and even your sense of self are all products of causal processes beyond your control.
                   </p>
 
@@ -127,7 +127,7 @@ export function AnalysisScreen({
                     <h4 className="font-medium mb-2 text-purple-300">The Deterministic Paradox</h4>
                     <p className="text-white/90">
                       Even your reaction to learning about determinism—whether you accept or reject it—is itself
-                      determined by your brain's structure, past experiences with philosophical ideas, and emotional
+                      determined by your brain&apos;s structure, past experiences with philosophical ideas, and emotional
                       responses to concepts that challenge your sense of agency. The very feeling of freedom is itself
                       determined.
                     </p>

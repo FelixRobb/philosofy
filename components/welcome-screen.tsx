@@ -66,7 +66,7 @@ export function WelcomeScreen({ welcomeStep, setWelcomeStep, startGame }: Welcom
         <p className="text-lg text-white/90 leading-relaxed">
           Determinism is the philosophical position that every event, including human cognition and action, is causally
           determined by prior events and the laws of nature. In this view, free will is an illusion—a feeling we have
-          when we don't perceive the causes of our thoughts and actions.
+          when we don&apos;t perceive the causes of our thoughts and actions.
         </p>
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -76,8 +76,8 @@ export function WelcomeScreen({ welcomeStep, setWelcomeStep, startGame }: Welcom
               <h3 className="font-semibold text-indigo-300">Neuroscientific View</h3>
             </div>
             <p className="text-white/80">
-              Neuroscience suggests that our decisions are made by brain processes before we're consciously aware of
-              them. Your neural pathways, formed by genetics and experience, determine your decisions before you're even
+              Neuroscience suggests that our decisions are made by brain processes before we&apos;re consciously aware of
+              them. Your neural pathways, formed by genetics and experience, determine your decisions before you&apos;re even
               aware of making a choice.
             </p>
           </div>
@@ -100,8 +100,8 @@ export function WelcomeScreen({ welcomeStep, setWelcomeStep, startGame }: Welcom
             <h3 className="font-semibold text-purple-300">The Experiment</h3>
           </div>
           <p className="text-white/80">
-            In this experience, you'll navigate through interconnected scenarios, making choices that feel free. Your
-            decisions will shape your path, creating the illusion of autonomy. At the end, we'll reveal the hidden
+            In this experience, you&apos;ll navigate through interconnected scenarios, making choices that feel free. Your
+            decisions will shape your path, creating the illusion of autonomy. At the end, we&apos;ll reveal the hidden
             causal web that actually determined your every choice.
           </p>
         </div>
@@ -140,7 +140,7 @@ export function WelcomeScreen({ welcomeStep, setWelcomeStep, startGame }: Welcom
         <div className="flex items-center mb-4">
           <Info className="h-5 w-5 mr-2 text-indigo-400 flex-shrink-0" />
           <p className="text-white/90">
-            You'll navigate through a series of interconnected scenarios. Your choices will shape your path, but
+            You&apos;ll navigate through a series of interconnected scenarios. Your choices will shape your path, but
             remember: the path itself is predetermined by factors beyond your control.
           </p>
         </div>
@@ -149,21 +149,21 @@ export function WelcomeScreen({ welcomeStep, setWelcomeStep, startGame }: Welcom
           <Hourglass className="h-5 w-5 mr-2 text-indigo-400 flex-shrink-0" />
           <p className="text-white/90">
             Some scenarios have time limits, reflecting how real-world time pressure affects decision-making processes.
-            After each choice, you'll see a philosophical reflection on determinism.
+            After each choice, you&apos;ll see a philosophical reflection on determinism.
           </p>
         </div>
 
         <div className="flex items-center">
           <BarChart3 className="h-5 w-5 mr-2 text-indigo-400 flex-shrink-0" />
           <p className="text-white/90">
-            At the end, you'll receive an analysis of your traits, decision patterns, and the causal web that shaped
+            At the end, you&apos;ll receive an analysis of your traits, decision patterns, and the causal web that shaped
             your journey, revealing the hidden deterministic forces behind your apparent choices.
           </p>
         </div>
 
         <div className="mt-6 p-4 bg-indigo-900/30 rounded-lg border border-indigo-500/20">
           <p className="text-indigo-200 italic text-center">
-            "{deterministicQuotes[Math.floor(Math.random() * deterministicQuotes.length)]}"
+            &quot;{deterministicQuotes[Math.floor(Math.random() * deterministicQuotes.length)]}&quot;
           </p>
         </div>
       </div>

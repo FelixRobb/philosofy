@@ -1,7 +1,7 @@
 "use client"
 
 import type { JSX } from "react"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import {
   Clock,
   Lightbulb,
@@ -670,9 +670,6 @@ export function DeterminismGame() {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
   const [decisionTimes, setDecisionTimes] = useState<Record<string, number>>({})
   const [startTime, setStartTime] = useState<number | null>(null)
-  const [pathVisualizer, setPathVisualizer] = useState(false)
-  const [mouseMovements, setMouseMovements] = useState<{ x: number; y: number; time: number }[]>([])
-  const [hoveredChoices, setHoveredChoices] = useState<Record<string, number>>({})
   const [revealedInfluences, setRevealedInfluences] = useState(false)
   const [showDeterministicQuote, setShowDeterministicQuote] = useState(true)
   const [welcomeStep, setWelcomeStep] = useState(0)
@@ -686,85 +683,8 @@ export function DeterminismGame() {
   // Calculate progress
   const progress = Math.min((completedDilemmas.length / 8) * 100, 100)
 
-  // Track mouse movements
-  useEffect(() => {
-    if (gameState !== "playing" || !containerRef.current) return
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
-        setMouseMovements((prev) => [...prev, { x, y, time: Date.now() }])
-      }
-    }
-
-    containerRef.current.addEventListener("mousemove", handleMouseMove)
-
-    return () => {
-      containerRef.current?.removeEventListener("mousemove", handleMouseMove)
-    }
-  }, [currentDilemmaId, gameState])
-
-  // Track choice hovering
-  const handleChoiceHover = (choiceId: string) => {
-    setHoveredChoices((prev) => ({
-      ...prev,
-      [choiceId]: (prev[choiceId] || 0) + 1,
-    }))
-  }
-
-  // Set up timer for time-limited dilemmas
-  useEffect(() => {
-    if (gameState !== "playing" || !currentDilemma || showReflection) return
-
-    if (currentDilemma.timeLimit) {
-      setTimeRemaining(currentDilemma.timeLimit)
-      setStartTime(Date.now())
-
-      const timer = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev === null || prev <= 1) {
-            clearInterval(timer)
-            // Auto-select first available choice if time runs out
-            const availableChoices = currentDilemma.choices.filter(
-              (choice) => !choice.requiresTrait || traits[choice.requiresTrait.trait] >= choice.requiresTrait.min,
-            )
-            if (availableChoices.length > 0) {
-              handleChoice(availableChoices[0])
-            }
-            return null
-          }
-          return prev - 1
-        })
-      }, 1000)
-
-      return () => clearInterval(timer)
-    } else {
-      setTimeRemaining(null)
-      setStartTime(Date.now())
-    }
-  }, [currentDilemmaId, showReflection, gameState])
-
-  // Filter choices based on user traits and priming
-  const availableChoices = currentDilemma
-    ? currentDilemma.choices.filter((choice) => {
-        // Check if this choice requires a certain trait level
-        if (choice.requiresTrait && traits[choice.requiresTrait.trait] < choice.requiresTrait.min) {
-          return false
-        }
-
-        // Check if this choice requires certain priming
-        if (choice.requiresPriming && mindState.primed !== choice.requiresPriming) {
-          return false
-        }
-
-        return true
-      })
-    : []
-
   // Handle making a choice
-  const handleChoice = (choice: Choice) => {
+  const handleChoice = useCallback((choice: Choice) => {
     if (!currentDilemma) return
 
     // Record decision time
@@ -846,7 +766,58 @@ export function DeterminismGame() {
 
     // Show reflection
     setShowReflection(true)
-  }
+  }, [currentDilemma, mindState.primed, mindState.stress, startTime, timeRemaining])
+
+  // Set up timer for time-limited dilemmas
+  useEffect(() => {
+    if (gameState !== "playing" || !currentDilemma || showReflection) return
+
+    if (currentDilemma.timeLimit) {
+      setTimeRemaining(currentDilemma.timeLimit)
+      setStartTime(Date.now())
+
+      const timer = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev === null || prev <= 1) {
+            clearInterval(timer)
+            // Auto-select first available choice if time runs out
+            const availableChoices = currentDilemma.choices.filter(
+              (choice) => !choice.requiresTrait || traits[choice.requiresTrait.trait] >= choice.requiresTrait.min,
+            )
+            if (availableChoices.length > 0) {
+              handleChoice(availableChoices[0])
+            }
+            return null
+          }
+          return prev - 1
+        })
+      }, 1000)
+
+      return () => clearInterval(timer)
+    } else {
+      setTimeRemaining(null)
+      setStartTime(Date.now())
+    }
+  }, [currentDilemmaId, showReflection, gameState, currentDilemma, traits, handleChoice])
+
+  // Filter choices based on user traits and priming
+  const availableChoices = currentDilemma
+    ? currentDilemma.choices.filter((choice) => {
+      // Check if this choice requires a certain trait level
+      if (choice.requiresTrait && traits[choice.requiresTrait.trait] < choice.requiresTrait.min) {
+        return false
+      }
+
+      // Check if this choice requires certain priming
+      if (choice.requiresPriming && mindState.primed !== choice.requiresPriming) {
+        return false
+      }
+
+      return true
+    })
+    : []
+
+
 
   const handleNext = () => {
     if (!currentDilemma) return
@@ -917,9 +888,6 @@ export function DeterminismGame() {
     setShowReflection(false)
     setChoiceHistory([])
     setDecisionTimes({})
-    setPathVisualizer(false)
-    setMouseMovements([])
-    setHoveredChoices({})
     setRevealedInfluences(false)
     setShowDeterministicQuote(true)
     setGameState("welcome")
@@ -945,6 +913,7 @@ export function DeterminismGame() {
     const patterns = []
 
     // Check for fast decisions
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const fastDecisions = Object.entries(decisionTimes).filter(([_, time]) => time < 5).length
     if (fastDecisions > completedDilemmas.length / 2) {
       patterns.push(
@@ -953,6 +922,7 @@ export function DeterminismGame() {
     }
 
     // Check for slow, deliberate decisions
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const slowDecisions = Object.entries(decisionTimes).filter(([_, time]) => time > 10).length
     if (slowDecisions > completedDilemmas.length / 2) {
       patterns.push(
@@ -982,7 +952,7 @@ export function DeterminismGame() {
     }
 
     // Check for first position bias under time pressure
-    const firstChoicesUnderPressure = choiceHistory.filter((choice, index) => {
+    const firstChoicesUnderPressure = choiceHistory.filter((choice) => {
       const dilemma = allDilemmas.find((d) => d.id === choice.dilemmaId)
       return choice.positionBias === "first" && dilemma?.timeLimit !== undefined
     }).length
@@ -1127,7 +1097,7 @@ export function DeterminismGame() {
                 <h3 className="font-semibold text-indigo-300">Your Brain</h3>
               </div>
               <p className="text-white/80">
-                Your neural pathways, formed by genetics and experience, determine your decisions before you're even
+                Your neural pathways, formed by genetics and experience, determine your decisions before you&apos;re even
                 aware of them.
               </p>
             </div>
@@ -1149,7 +1119,7 @@ export function DeterminismGame() {
               <h3 className="font-semibold text-purple-300">The Experiment</h3>
             </div>
             <p className="text-white/80">
-              In this experience, you'll navigate through 8 scenarios, making choices that feel free. At the end, we'll
+              In this experience, you&apos;ll navigate through 8 scenarios, making choices that feel free. At the end, we&apos;ll
               reveal the hidden influences that actually determined your decisions.
             </p>
           </div>
@@ -1188,7 +1158,7 @@ export function DeterminismGame() {
           <div className="flex items-center mb-4">
             <Info className="h-5 w-5 mr-2 text-indigo-400 flex-shrink-0" />
             <p className="text-white/90">
-              You'll navigate through a day of choices. Some scenarios may have time limits, and not all options will be
+              You&apos;ll navigate through a day of choices. Some scenarios may have time limits, and not all options will be
               available in every situation.
             </p>
           </div>
@@ -1196,7 +1166,7 @@ export function DeterminismGame() {
           <div className="flex items-center mb-4">
             <Hourglass className="h-5 w-5 mr-2 text-indigo-400 flex-shrink-0" />
             <p className="text-white/90">
-              Take your time with each decision (unless there's a time limit!). After each choice, you'll see a
+              Take your time with each decision (unless there&apos;s a time limit!). After each choice, you&apos;ll see a
               reflection on determinism.
             </p>
           </div>
@@ -1204,14 +1174,14 @@ export function DeterminismGame() {
           <div className="flex items-center">
             <BarChart3 className="h-5 w-5 mr-2 text-indigo-400 flex-shrink-0" />
             <p className="text-white/90">
-              At the end, you'll receive an analysis of your traits and decision patterns, revealing the hidden
+              At the end, you&apos;ll receive an analysis of your traits and decision patterns, revealing the hidden
               influences that shaped your choices.
             </p>
           </div>
 
           <div className="mt-6 p-4 bg-indigo-900/30 rounded-lg border border-indigo-500/20">
             <p className="text-indigo-200 italic text-center">
-              "{deterministicQuotes[Math.floor(Math.random() * deterministicQuotes.length)]}"
+              &quot;{deterministicQuotes[Math.floor(Math.random() * deterministicQuotes.length)]}&quot;
             </p>
           </div>
         </div>
@@ -1323,7 +1293,6 @@ export function DeterminismGame() {
                           variant="outline"
                           className="w-full justify-start text-left h-auto py-4 px-4 border-indigo-500/30 text-white hover:bg-indigo-900/30 hover:border-indigo-400/50 transition-all"
                           onClick={() => handleChoice(choice)}
-                          onMouseEnter={() => handleChoiceHover(choice.id)}
                         >
                           {choice.text}
                         </Button>
@@ -1351,8 +1320,8 @@ export function DeterminismGame() {
                         {Object.entries(
                           choiceHistory[choiceHistory.length - 1]
                             ? currentDilemma?.choices.find(
-                                (c) => c.id === choiceHistory[choiceHistory.length - 1].choiceId,
-                              )?.traitEffects || {}
+                              (c) => c.id === choiceHistory[choiceHistory.length - 1].choiceId,
+                            )?.traitEffects || {}
                             : {},
                         ).map(([trait, effect]) => (
                           <div key={trait} className="flex items-center">
@@ -1472,7 +1441,7 @@ export function DeterminismGame() {
                 <TabsContent value="analysis" className="mt-6 space-y-6">
                   <div className="space-y-6">
                     <p className="text-lg text-white/90 leading-relaxed">
-                      You've navigated through a series of seemingly unrelated scenarios, making what felt like free
+                      You&apos;ve navigated through a series of seemingly unrelated scenarios, making what felt like free
                       choices along the way.
                     </p>
 
@@ -1514,7 +1483,7 @@ export function DeterminismGame() {
                       <h4 className="font-medium mb-2 text-purple-300">The Deterministic Paradox</h4>
                       <p className="text-white/90">
                         Even your reaction to learning about determinism—whether you accept or reject it—is itself
-                        determined by your brain's structure, past experiences with philosophical ideas, and emotional
+                        determined by your brain&apos;s structure, past experiences with philosophical ideas, and emotional
                         responses to concepts that challenge your sense of agency.
                       </p>
                     </div>
@@ -1547,7 +1516,7 @@ export function DeterminismGame() {
                       <p className="text-white/80">
                         The changes in your traits throughout this experience were not random. Each trait shift was the
                         inevitable result of how your existing traits interacted with the scenarios presented. Your
-                        brain's neuroplasticity—its ability to change—follows deterministic laws of cause and effect.
+                        brain&apos;s neuroplasticity—its ability to change—follows deterministic laws of cause and effect.
                       </p>
                     </div>
                   </div>

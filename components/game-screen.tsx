@@ -140,7 +140,7 @@ export function GameScreen({
             <CardContent className="pt-6">
               <div className="flex items-center mb-6">
                 <div className="flex-shrink-0 w-16 h-16 rounded-full bg-indigo-900/50 border border-indigo-500/30 flex items-center justify-center mr-4">
-                  {currentDilemma && dilemmaImages[currentDilemma.image]}
+                  {currentDilemma?.image && dilemmaImages[currentDilemma.image as keyof typeof dilemmaImages]}
                 </div>
                 <p className="text-lg text-white/90">{currentDilemma?.scenario}</p>
               </div>
@@ -171,4 +171,3 @@ export function GameScreen({
     </div>
   )
 }
-

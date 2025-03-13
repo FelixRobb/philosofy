@@ -1202,14 +1202,14 @@ export function DeterminismGame() {
             size="lg"
             variant="outline"
             onClick={() => setWelcomeStep(1)}
-            className="border-indigo-500/50 text-indigo-300 hover:bg-indigo-900/50 px-8 py-6 text-lg"
+            className="border-indigo-500/50 text-indigo-300 hover:bg-indigo-900/50"
           >
             Back
           </Button>
           <Button
             size="lg"
             onClick={() => setGameState("playing")}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-6 text-lg"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
           >
             <Play className="mr-2 h-5 w-5" />
             Start the Experience
